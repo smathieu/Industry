@@ -1,11 +1,20 @@
 class IndustryModel
-  traits: {}
+  _traits: {}
   _data: {}
   _base: -> {}
   _klass: false
 
+  constructor: (data) ->
+    @_traits = {}
+    @_data   = {}
+    @_base   = -> {}
+    @_klass  = false
+
   trait: (name, afunc) ->
-    @traits[name] = afunc
+    @_traits[name] = afunc
+
+  traits: (traits) ->
+    @_traits = $.extend(@_traits, traits)
 
   data: (options) ->
     if typeof options is 'function'
@@ -24,8 +33,8 @@ class IndustryModel
     data = $.extend({}, @_data, @_base(), data)
 
     for trait, i in traits
-      if @traits[trait]
-        data = $.extend({}, data, @traits[trait].apply(@, []))
+      if @_traits[trait]
+        data = $.extend({}, data, @_traits[trait].apply(@, []))
 
     for key, val of data
       if typeof val is 'function'
@@ -37,6 +46,14 @@ class IndustryModel
 
 
 class IndustryCollection extends IndustryModel
+  _model: false
+
+  constructor: ->
+    @_model = false
+    super
+
+  model: (m) ->
+    @_model = m
 
   create: (data, count, model, traits...) ->
 
@@ -54,8 +71,11 @@ class IndustryCollection extends IndustryModel
 
     collection = []
 
-    for i in [1..count]
-      collection.push(model.create(data, traits...))
+    if ! model and @_model then model = @_model
+
+    if typeof model != 'undefined' and model != null
+      for i in [1..count]
+        collection.push(model.create(data, traits...))
 
     if @_klass then collection = new @_klass(collection)
 
@@ -63,10 +83,11 @@ class IndustryCollection extends IndustryModel
 
 
 class ModelFactory
-  klass: IndustryModel
+  _klass: IndustryModel
+
   define: (options, callback) ->
 
-    instance = new @klass
+    instance = new @_klass
 
     if ! callback and typeof options is 'function'
       callback = options
@@ -74,22 +95,24 @@ class ModelFactory
     else if typeof options is 'object'
 
       if options.parent
-        instance.base(options.parent._base)
+        instance.data(options.parent._base)
         instance.data(options.parent._data)
         instance.klass(options.parent._klass)
 
-        for name, trait of options.parent.traits
+        for name, trait of options.parent._traits
           instance.trait(name, trait)
 
-      if options.base
-        instance.data(options.base)
+      if options.data
+        instance.data(options.data)
 
       if options.traits
-        for name, trait of options.traits
-          instance.trait(name, options.traits[key])
+        instance.traits(options.traits)
 
       if options.klass
         instance.klass(options.klass)
+
+      if options.model
+        instance.model(options.model)
 
     if typeof callback is 'function'
       callback(instance)
@@ -98,10 +121,16 @@ class ModelFactory
 
 
 class CollectionFactory extends ModelFactory
-  klass: IndustryCollection
+  _klass: IndustryCollection
 
-window.IndustryModel      = new IndustryModel
-window.IndustryCollection = new IndustryCollection
-window.ModelFactory       = new ModelFactory
-window.CollectionFactory  = new CollectionFactory
-
+if typeof window != 'undefined'
+  window.IndustryModel      = new IndustryModel
+  window.IndustryCollection = new IndustryCollection
+  window.ModelFactory       = new ModelFactory
+  window.CollectionFactory  = new CollectionFactory
+else if typeof module != 'undefined'
+  $ = require('jquery')
+  module.exports.IndustryModel      = new IndustryModel
+  module.exports.IndustryCollection = new IndustryCollection
+  module.exports.ModelFactory       = new ModelFactory
+  module.exports.CollectionFactory  = new CollectionFactory
