@@ -72,6 +72,7 @@ modelFactory = industry.defineModel traits: sharedTraits, (f) ->
 
 model = modelFactory.create(null, 'passed', 'set_active')
 
+
 model.id
 # => 'step_1'
 
@@ -86,6 +87,52 @@ model.result
 
 model.status
 # => 'active'
+```
+
+Using traits with options
+
+```coffeescript
+modelFactory = industry.defineModel (f) ->
+
+  f.data ->
+    id: -> "step_#{f.sequence('id')}"
+    created_at: -> new Date().toString()
+
+  f.trait 'permissions', (options), ->
+    return_value = {}
+
+    if options.hasOption('admin')
+      return_value['admin'] = true
+    if options.hasOption('moderator')
+      return_value['moderator'] = true
+    if options.hasOption('member')
+      return_value['member'] = true
+
+    return return_value
+
+
+model = modelFactory.create(null, 'passed', 'set_active', 'permissions')
+
+model.permissions
+# => {}
+
+
+model = modelFactory.create(null, 'passed', 'set_active', 'permissions:member')
+
+model.permissions
+# => {member: true}
+
+
+model = modelFactory.create(null, 'passed', 'set_active', 'permissions:member:moderator')
+
+model.permissions
+# => {member: true, moderator: true}
+
+
+model = modelFactory.create(null, 'passed', 'set_active', 'permissions:all!')
+
+model.permissions
+# => {member: true, moderator: true, admin: true}
 ```
 
 Using parent models
