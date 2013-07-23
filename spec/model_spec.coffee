@@ -1,6 +1,6 @@
 $        = require('jquery')
 test     = require('../lib/test.coffee')
-industry = require('../lib/Industry.coffee').industry
+industry = require('../lib/industry.coffee').industry
 
 describe "Industry Model: ", ->
 

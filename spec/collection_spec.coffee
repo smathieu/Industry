@@ -1,6 +1,6 @@
 $        = require('jquery')
 test     = require('../lib/test.coffee')
-industry = require('../lib/Industry.coffee').industry
+industry = require('../lib/industry.coffee').industry
 
 describe "Industry Collection: ", ->
 
@@ -68,4 +68,38 @@ describe "Industry Collection: ", ->
 
     expect(result.length).toEqual(5)
     expect(Object.keys(result[0].data)).toEqual(['input', 'pizza', 'other'])
+
+  it "Create a collection with sequences", ->
+
+    modelFactory = industry.model.define (f) ->
+
+      f.data ->
+        id: "test_#{f.sequence('id')}"
+        name: "Milly"
+
+
+    collectionFactory = industry.collection.define model: modelFactory, (f) ->
+
+      f.trait 'email', ->
+        email: "example#{f.sequence('email')}@google.com"
+
+
+    collection = collectionFactory.create(null, 5, null, 'email')
+
+    expect(collection.length).toEqual(5)
+
+    for model, i in collection
+      expect(model.id).toEqual("test_#{i+1}")
+      expect(model.name).toEqual('Milly')
+
+
+
+
+
+
+
+
+
+
+
 

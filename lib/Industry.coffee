@@ -10,6 +10,9 @@ class IndustryModel
     @_base   = -> {}
     @_klass  = false
 
+  sequence: (name) ->
+    ModelFactory.sequence(name)
+
   trait: (name, afunc) ->
     @_traits[name] = afunc
 
@@ -34,11 +37,11 @@ class IndustryModel
 
     for trait, i in traits
       if @_traits[trait]
-        data = $.extend({}, data, @_traits[trait].apply(@, []))
+        data = $.extend({}, data, @_traits[trait].call(@))
 
     for key, val of data
       if typeof val is 'function'
-        data[key] = val()
+        data[key] = val.apply(@, [])
 
     if @_klass then data = new @_klass(data)
 
@@ -84,6 +87,13 @@ class IndustryCollection extends IndustryModel
 
 class ModelFactory
   @_klass: IndustryModel
+  @_sequences: {}
+
+  @sequence: (name) ->
+    if typeof @_sequences[name] is 'undefined'
+      @_sequences[name] = 1
+    else
+      ++@_sequences[name]
 
   @define: (options, callback) ->
 
