@@ -22,7 +22,7 @@ Production Dependencies
 Basic Model usage with traits.
 
 ```coffeescript
-modelFactory = industry.model.define (f) ->
+modelFactory = industry.defineModel (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -63,7 +63,7 @@ sharedTraits = {
 }
 
 
-modelFactory = industry.model.define traits: sharedTraits, (f) ->
+modelFactory = industry.defineModel traits: sharedTraits, (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -91,7 +91,7 @@ model.status
 Using parent models
 
 ```coffeescript
-firstModelFactory = industry.model.define (f) ->
+firstModelFactory = industry.defineModel (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -104,7 +104,7 @@ firstModelFactory = industry.model.define (f) ->
     result: 'failed'
 
 
-secondModelFactory = industry.model.define parent: firstModelFactory, (f) ->
+secondModelFactory = industry.defineModel parent: firstModelFactory, (f) ->
 
   f.trait 'set_active', ->
     status: active
@@ -132,7 +132,7 @@ model.status
 Using a collection
 
 ```coffeescript
-modelFactory = industry.model.define (f) ->
+modelFactory = industry.defineModel (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -145,7 +145,7 @@ modelFactory = industry.model.define (f) ->
     result: 'failed'
 
 
-collectionFactory = industry.collection.define(model: modelFactory)
+collectionFactory = industry.defineCollection(model: modelFactory)
 
 
 collection = collectionFactory.create(null, 5)

@@ -11,16 +11,16 @@ class IndustryModel
     @_klass  = false
 
   sequence: (name) ->
-    ModelFactory.sequence(name)
+    IndustryFactory.sequence(name)
 
   trait: (name, afunc) ->
     @_traits[name] = afunc
 
   traits: (traits) ->
-    @_traits = $.extend({}, @_traits, traits)
+    if arguments.length < 1
+      return @_traits
 
-  getTrait: (name) ->
-    @_traits[name]
+    @_traits = $.extend({}, @_traits, traits)
 
   data: (options) ->
     if typeof options is 'function'
@@ -31,24 +31,27 @@ class IndustryModel
   klass: (obj) ->
     @_klass = obj
 
-  create: (data, traits...) ->
+  create: ->
 
-    if data == null
-      ndata = {}
+    data   = {}
+    traits = []
+
+    for argument in arguments
+      if typeof argument is 'string'
+        traits.push(argument)
+      if typeof argument is 'object'
+        data = argument
+
+    if data == null then data = {}
 
     data = $.extend({}, @_data, @_base(), data)
 
-    for trait in traits
-      trait = new TraitSelection(trait)
-
-      if @getTrait(trait.name)
-        data = $.extend({}, data, @getTrait(trait.name).call(@, trait))
-
-      trait = null
+    new TraitSelection(@).each traits, (trait, d) =>
+      data = $.extend({}, data, trait.call(@, d))
 
     for key, val of data
       if typeof val is 'function'
-        data[key] = val.apply(@, [])
+        data[key] = val.call(@)
 
     if @_klass then data = new @_klass(data)
 
@@ -65,46 +68,55 @@ class IndustryCollection extends IndustryModel
   model: (m) ->
     @_model = m
 
-  create: (data, count, model, traits...) ->
+  create: ->
 
-    if data == null
-      data = {}
+    count  = 5
+    data   = {}
+    traits = []
+    cache  = false
+
+    for argument, i in arguments
+      if typeof argument is 'number'
+        count = argument
+      if typeof argument is 'string'
+        traits.push(argument)
+      if typeof argument is 'object'
+        if ! cache
+          model = argument
+          cache = true
+        else
+          data = argument
 
     _klass = @_klass
     @_klass = false
 
-    data = super(data, traits...)
+    data = super(data)
 
     @_klass = _klass
-
-    if ! count then count = 5
 
     collection = []
 
     if ! model and @_model then model = @_model
 
     if typeof model != 'undefined' and model != null
-      for i in [1..count]
-        collection.push(model.create(data, traits...))
+      if count > 0
+        for i in [1..count]
+          model.traits(@_traits)
+          collection.push(model.create(traits..., data))
+    else
+      throw "No model for collection"
 
     if @_klass then collection = new @_klass(collection)
 
     return collection
 
 
-class ModelFactory
-  @_klass: IndustryModel
-  @_sequences: {}
+class IndustryFactory
+  klass = IndustryModel
+  sequences = {}
 
-  @sequence: (name) ->
-    if typeof @_sequences[name] is 'undefined'
-      @_sequences[name] = 1
-    else
-      ++@_sequences[name]
-
-  @define: (options, callback) ->
-
-    instance = new @_klass
+  define = (options, callback) ->
+    instance = new klass
 
     if ! callback and typeof options is 'function'
       callback = options
@@ -136,55 +148,53 @@ class ModelFactory
 
     return instance
 
+  @sequence: (name) ->
+    if typeof sequences[name] is 'undefined'
+      sequences[name] = 1
+    else
+      ++sequences[name]
 
-class CollectionFactory extends ModelFactory
-  @_klass: IndustryCollection
+  @defineCollection: ->
+    klass = IndustryCollection
+    define.apply(@, arguments)
+
+  @defineModel: (options, callback) ->
+    klass = IndustryModel
+    define.apply(@, arguments)
 
 
 class TraitSelection
-  name: false
-  _options: {}
+  @obj: false
 
-  constructor: (options) ->
-    @_options = {}
-    @name = false
+  constructor: (obj) ->
+    @obj = obj
 
-    options = options.split(':')
-    @name = options.shift()
+  each: (traits, callback) ->
 
-    for option in options
-      @_options[option] = true
+    for trait in traits
+      options = trait.split(':')
+      name = options.shift()
+      trait = @obj._traits[name]
 
-  hasOption: (options...) ->
-    if options.length < 1
-      return false
+      if typeof trait != 'undefined'
+        callback trait,
+          hasOption: -> @hasOptions(arguments...)
+          hasOptions: (input...) ->
+            if options.length < 1 then return false
+            if options.indexOf('all!') != -1 then return true
 
-    if @_options['all!'] != 'undefined'
-      return true
+            result = true
+            for option in input
+              result = (result && options.indexOf(option) != -1)
 
-    result = true
-    for option in options
-      result = result && typeof @_options[option] != 'undefined'
-
-    return result
-
-  hasOptions: (options) ->
-    @hasOption(options)
+            return result
 
 
 if typeof window != 'undefined'
-  window.industry            = {}
-  # window.IndustryModel      = IndustryModel
-  # window.IndustryCollection = IndustryCollection
-  window.industry.model       = ModelFactory
-  window.industry.collection  = CollectionFactory
+  window.industry = IndustryFactory
 else if typeof module != 'undefined'
   _ = require('underscore')
-  module.exports.industry            = {}
-  #module.exports.IndustryModel      = IndustryModel
-  #module.exports.IndustryCollection = IndustryCollection
-  module.exports.industry.model       = ModelFactory
-  module.exports.industry.collection  = CollectionFactory
+  module.exports.industry = IndustryFactory
 
 
 if typeof $ is 'undefined' and typeof _ != 'undefined' then $ = _

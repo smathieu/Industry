@@ -4,7 +4,7 @@ industry = require('../lib/industry.coffee').industry
 describe "Industry Model: ", ->
 
   it "Create new empty model", ->
-    model = industry.model.define()
+    model = industry.defineModel()
 
     expect(model._data).toEqual({})
     expect(typeof model._base).toEqual('function')
@@ -17,7 +17,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with object for default", ->
-    model = industry.model.define (f) ->
+    model = industry.defineModel (f) ->
       f.data
         input: 'value'
         input1: 'value1'
@@ -33,7 +33,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with anonymous function for default", ->
-    model = industry.model.define (f) ->
+    model = industry.defineModel (f) ->
       f.data ->
         time = new Date().getTime()
         {time: time}
@@ -50,7 +50,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with traits", ->
-    model = industry.model.define (f) ->
+    model = industry.defineModel (f) ->
       f.data
         input: 'value'
 
@@ -71,7 +71,7 @@ describe "Industry Model: ", ->
     factory = null
 
     beforeEach ->
-      factory = industry.model.define (f) ->
+      factory = industry.defineModel (f) ->
         f.data
           input: 'value'
 
@@ -80,8 +80,6 @@ describe "Industry Model: ", ->
 
         f.trait 'option', (options) ->
           ret = {}
-
-          console.log(options._options)
 
           if options.hasOption('apple')
             ret['options_apple'] = true
@@ -116,14 +114,14 @@ describe "Industry Model: ", ->
       expect(result.options_orange).toBeTruthy()
 
   it "Create model from a parent", ->
-    parent = industry.model.define (f) ->
+    parent = industry.defineModel (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
         time: new Date().getTime()
 
-    model = industry.model.define parent: parent, (f) ->
+    model = industry.defineModel parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 
@@ -139,14 +137,14 @@ describe "Industry Model: ", ->
 
 
   it "Create model with a class", ->
-    parent = industry.model.define (f) ->
+    parent = industry.defineModel (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
         time: new Date().getTime()
 
-    model = industry.model.define parent: parent, (f) ->
+    model = industry.defineModel parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 
