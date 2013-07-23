@@ -67,6 +67,39 @@ describe "Industry Model: ", ->
     expect(result.time).toBeCloseTo(new Date().getTime(), 0)
 
 
+  it "Create model with traits (with sub options)", ->
+    model = industry.model.define (f) ->
+      f.data
+        input: 'value'
+
+      f.trait 'currentTime', ->
+        time: new Date().getTime()
+
+      f.trait 'option', (options...) ->
+        ret = {}
+
+        if options.indexOf('apple') != -1
+          ret['options_apple'] = true
+        if options.indexOf('pizza') != -1
+          ret['options_pizza'] = true
+        if options.indexOf('orange') != -1
+          ret['options_orange'] = true
+
+        ret
+
+    expect(model._data).toEqual(input: 'value')
+    expect(typeof model._base).toEqual('function')
+    expect(model._base()).toEqual({})
+    expect(model._klass).toEqual(false)
+    expect(Object.keys(model._traits).length).toEqual(2)
+
+    result = model.create(null, 'option:apple:pizza')
+
+    expect(result.options_apple).toBeTruthy()
+    expect(result.options_pizza).toBeTruthy()
+    expect(result.options_organge).toEqual(undefined)
+
+
   it "Create model from a parent", ->
     parent = industry.model.define (f) ->
       f.data

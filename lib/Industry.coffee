@@ -36,8 +36,10 @@ class IndustryModel
     data = $.extend({}, @_data, @_base(), data)
 
     for trait, i in traits
-      if @_traits[trait]
-        data = $.extend({}, data, @_traits[trait].call(@))
+      trait = trait.split(':')
+
+      if @_traits[trait[0]]
+        data = $.extend({}, data, @_traits[trait[0]].apply(@, trait))
 
     for key, val of data
       if typeof val is 'function'
