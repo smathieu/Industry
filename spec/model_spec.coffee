@@ -75,14 +75,14 @@ describe "Industry Model: ", ->
       f.trait 'currentTime', ->
         time: new Date().getTime()
 
-      f.trait 'option', (options...) ->
+      f.trait 'option', (options) ->
         ret = {}
 
-        if options.indexOf('apple') != -1
+        if options.hasOption('apple')
           ret['options_apple'] = true
-        if options.indexOf('pizza') != -1
+        if options.hasOption('pizza')
           ret['options_pizza'] = true
-        if options.indexOf('orange') != -1
+        if options.hasOption('orange')
           ret['options_orange'] = true
 
         ret

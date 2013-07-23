@@ -35,11 +35,11 @@ class IndustryModel
 
     data = $.extend({}, @_data, @_base(), data)
 
-    for trait, i in traits
-      trait = trait.split(':')
+    for trait in traits
+      trait = new TraitSelection(trait)
 
-      if @_traits[trait[0]]
-        data = $.extend({}, data, @_traits[trait[0]].apply(@, trait))
+      if @_traits[trait.name]
+        data = $.extend({}, data, @_traits[trait.name].call(@, trait))
 
     for key, val of data
       if typeof val is 'function'
@@ -134,6 +134,31 @@ class ModelFactory
 
 class CollectionFactory extends ModelFactory
   @_klass: IndustryCollection
+
+
+class TraitSelection
+  name: false
+  _options: {}
+
+  constructor: (options) ->
+    options = options.split(':')
+    @name = options.shift()
+
+    for option in options
+      @_options[option] = true
+
+  hasOption: (options...) ->
+    if options.length < 1
+      return false
+
+    result = true
+    for option in options
+      result = result && typeof @_options[option] != 'undefined'
+
+    return result
+
+  hasOptions: (options) ->
+    @hasOption(options)
 
 
 if typeof window != 'undefined'
