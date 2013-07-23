@@ -1,4 +1,3 @@
-$        = require('jquery')
 test     = require('../lib/test.coffee')
 industry = require('../lib/industry.coffee').industry
 
