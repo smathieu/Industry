@@ -83,9 +83,9 @@ class IndustryCollection extends IndustryModel
 
 
 class ModelFactory
-  _klass: IndustryModel
+  @_klass: IndustryModel
 
-  define: (options, callback) ->
+  @define: (options, callback) ->
 
     instance = new @_klass
 
@@ -121,7 +121,8 @@ class ModelFactory
 
 
 class CollectionFactory extends ModelFactory
-  _klass: IndustryCollection
+  @_klass: IndustryCollection
+
 
 if typeof window != 'undefined'
   window.IndustryModel      = new IndustryModel
@@ -129,8 +130,13 @@ if typeof window != 'undefined'
   window.ModelFactory       = new ModelFactory
   window.CollectionFactory  = new CollectionFactory
 else if typeof module != 'undefined'
-  $ = require('jquery')
-  module.exports.IndustryModel      = new IndustryModel
-  module.exports.IndustryCollection = new IndustryCollection
-  module.exports.ModelFactory       = new ModelFactory
-  module.exports.CollectionFactory  = new CollectionFactory
+  _ = require('underscore')
+  module.exports.IndustryModel      = IndustryModel
+  module.exports.IndustryCollection = IndustryCollection
+  module.exports.ModelFactory       = ModelFactory
+  module.exports.CollectionFactory  = CollectionFactory
+
+
+if typeof $ is 'undefined' and typeof _ != 'undefined' then $ = _
+else if typeof $ is 'undefined' and typeof _ is 'undefined'
+  throw "Underscore.js or jQuery is required."
