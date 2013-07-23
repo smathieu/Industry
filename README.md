@@ -2,12 +2,27 @@
 
 **Factories for JavaScript/Backbone.js, coming soon to a rainforest near you.** :D
 
+# Dependencies
+
+Test Dependencies
+
+- Node
+- NPM
+- CoffeeScript
+- Jasmine
+- Underscore.js
+
+Production Dependencies
+
+- CoffeeScript (unless pre-compiled)
+- Underscore.js or jQuery
+
 # Usage
 
 Basic Model usage with traits.
 
 ```coffeescript
-model = ModelFactory.define (f) ->
+modelFactory = industry.model.define (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -20,18 +35,18 @@ model = ModelFactory.define (f) ->
     result: 'failed'
 
 
-newModel = model.create(null, 'passed')
+model = modelFactory.create(null, 'passed')
 
 
-newModel.id
+model.id
 # => 'step_1'
 
 
-newModel.created_at
+model.created_at
 # => DateStamp
 
 
-newModel.result
+model.result
 # => 'passed'
 ```
 
@@ -48,35 +63,35 @@ sharedTraits = {
 }
 
 
-model = ModelFactory.define traits: sharedTraits, (f) ->
+modelFactory = industry.model.define traits: sharedTraits, (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
     created_at: -> new Date().toString()
 
 
-newModel = model.create(null, 'passed', 'set_active')
+model = modelFactory.create(null, 'passed', 'set_active')
 
-newModel.id
+model.id
 # => 'step_1'
 
 
-newModel.created_at
+model.created_at
 # => DateStamp
 
 
-newModel.result
+model.result
 # => 'passed'
 
 
-newModel.status
+model.status
 # => 'active'
 ```
 
 Using parent models
 
 ```coffeescript
-firstModel = ModelFactory.define (f) ->
+firstModelFactory = industry.model.define (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -89,35 +104,35 @@ firstModel = ModelFactory.define (f) ->
     result: 'failed'
 
 
-secondModel = ModelFactory.define parent: firstModel, (f) ->
+secondModelFactory = industry.model.define parent: firstModelFactory, (f) ->
 
   f.trait 'set_active', ->
     status: active
 
 
-newModel = model.create(null, 'passed')
+model = secondModelFactory.create(null, 'passed')
 
 
-newModel.id
+model.id
 # => 'step_1'
 
 
-newModel.created_at
+model.created_at
 # => DateStamp
 
 
-newModel.result
+model.result
 # => 'passed'
 
 
-newModel.status
+model.status
 # => 'active'
 ```
 
 Using a collection
 
 ```coffeescript
-model = ModelFactory.define (f) ->
+modelFactory = industry.model.define (f) ->
 
   f.data ->
     id: -> "step_#{f.sequence('id')}"
@@ -130,21 +145,21 @@ model = ModelFactory.define (f) ->
     result: 'failed'
 
 
-collection = CollectionFactory.define(model: model)
+collectionFactory = industry.collection.define(model: modelFactory)
 
 
-results = collection.create(null, 5)
+collection = collectionFactory.create(null, 5)
 
 
-results.length
+collection.length
 # => 5
 
 
-results[0].id
+collection[0].id
 # => 'step_1'
 
 
-results[1].id
+collection[1].id
 # => 'step_2'
 ```
 
