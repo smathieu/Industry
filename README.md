@@ -35,7 +35,7 @@ modelFactory = industry.defineModel (f) ->
     result: 'failed'
 
 
-model = modelFactory.create(null, 'passed')
+model = modelFactory.create('passed')
 
 
 model.id
@@ -70,7 +70,7 @@ modelFactory = industry.defineModel traits: sharedTraits, (f) ->
     created_at: -> new Date().toString()
 
 
-model = modelFactory.create(null, 'passed', 'set_active')
+model = modelFactory.create('passed', 'set_active')
 
 
 model.id
@@ -111,25 +111,25 @@ modelFactory = industry.defineModel (f) ->
     return return_value
 
 
-model = modelFactory.create(null, 'passed', 'set_active', 'permissions')
+model = modelFactory.create('passed', 'set_active', 'permissions')
 
 model.permissions
 # => {}
 
 
-model = modelFactory.create(null, 'passed', 'set_active', 'permissions:member')
+model = modelFactory.create('passed', 'set_active', 'permissions:member')
 
 model.permissions
 # => {member: true}
 
 
-model = modelFactory.create(null, 'passed', 'set_active', 'permissions:member:moderator')
+model = modelFactory.create('passed', 'set_active', 'permissions:member:moderator')
 
 model.permissions
 # => {member: true, moderator: true}
 
 
-model = modelFactory.create(null, 'passed', 'set_active', 'permissions:all!')
+model = modelFactory.create('passed', 'set_active', 'permissions:all!')
 
 model.permissions
 # => {member: true, moderator: true, admin: true}
@@ -157,7 +157,7 @@ secondModelFactory = industry.defineModel parent: firstModelFactory, (f) ->
     status: active
 
 
-model = secondModelFactory.create(null, 'passed')
+model = secondModelFactory.create('passed')
 
 
 model.id
@@ -195,7 +195,7 @@ modelFactory = industry.defineModel (f) ->
 collectionFactory = industry.defineCollection(model: modelFactory)
 
 
-collection = collectionFactory.create(null, 5)
+collection = collectionFactory.create(5)
 
 
 collection.length
