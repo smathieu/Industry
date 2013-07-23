@@ -125,16 +125,18 @@ class CollectionFactory extends ModelFactory
 
 
 if typeof window != 'undefined'
-  window.IndustryModel      = new IndustryModel
-  window.IndustryCollection = new IndustryCollection
-  window.ModelFactory       = new ModelFactory
-  window.CollectionFactory  = new CollectionFactory
+  window.industry            = {}
+  # window.IndustryModel      = IndustryModel
+  # window.IndustryCollection = IndustryCollection
+  window.industry.model       = ModelFactory
+  window.industry.collection  = CollectionFactory
 else if typeof module != 'undefined'
   _ = require('underscore')
-  module.exports.IndustryModel      = IndustryModel
-  module.exports.IndustryCollection = IndustryCollection
-  module.exports.ModelFactory       = ModelFactory
-  module.exports.CollectionFactory  = CollectionFactory
+  module.exports.industry            = {}
+  #module.exports.IndustryModel      = IndustryModel
+  #module.exports.IndustryCollection = IndustryCollection
+  module.exports.industry.model       = ModelFactory
+  module.exports.industry.collection  = CollectionFactory
 
 
 if typeof $ is 'undefined' and typeof _ != 'undefined' then $ = _

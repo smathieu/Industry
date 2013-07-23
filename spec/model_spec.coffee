@@ -1,11 +1,11 @@
 $        = require('jquery')
 test     = require('../lib/test.coffee')
-industry = require('../lib/Industry.coffee')
+industry = require('../lib/Industry.coffee').industry
 
 describe "Industry Model: ", ->
 
   it "Create new empty model", ->
-    model = industry.ModelFactory.define()
+    model = industry.model.define()
 
     expect(model._data).toEqual({})
     expect(typeof model._base).toEqual('function')
@@ -18,7 +18,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with object for default", ->
-    model = industry.ModelFactory.define (f) ->
+    model = industry.model.define (f) ->
       f.data
         input: 'value'
         input1: 'value1'
@@ -34,7 +34,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with anonymous function for default", ->
-    model = industry.ModelFactory.define (f) ->
+    model = industry.model.define (f) ->
       f.data ->
         time = new Date().getTime()
         {time: time}
@@ -51,7 +51,7 @@ describe "Industry Model: ", ->
 
 
   it "Create model with traits", ->
-    model = industry.ModelFactory.define (f) ->
+    model = industry.model.define (f) ->
       f.data
         input: 'value'
 
@@ -69,14 +69,14 @@ describe "Industry Model: ", ->
 
 
   it "Create model from a parent", ->
-    parent = industry.ModelFactory.define (f) ->
+    parent = industry.model.define (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
         time: new Date().getTime()
 
-    model = industry.ModelFactory.define parent: parent, (f) ->
+    model = industry.model.define parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 
@@ -92,14 +92,14 @@ describe "Industry Model: ", ->
 
 
   it "Create model with a class", ->
-    parent = industry.ModelFactory.define (f) ->
+    parent = industry.model.define (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
         time: new Date().getTime()
 
-    model = industry.ModelFactory.define parent: parent, (f) ->
+    model = industry.model.define parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 

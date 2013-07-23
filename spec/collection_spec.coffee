@@ -1,11 +1,11 @@
 $        = require('jquery')
 test     = require('../lib/test.coffee')
-industry = require('../lib/Industry.coffee')
+industry = require('../lib/Industry.coffee').industry
 
 describe "Industry Collection: ", ->
 
   it "Create new empty collection", ->
-    collection = industry.CollectionFactory.define()
+    collection = industry.collection.define()
 
     expect(collection._data).toEqual({})
     expect(typeof collection._base).toEqual('function')
@@ -19,7 +19,7 @@ describe "Industry Collection: ", ->
 
   it "Create collection with 1 model", ->
 
-    model = industry.ModelFactory.define(data: {input: 'value'})
+    model = industry.model.define(data: {input: 'value'})
 
     expect(model._data).toEqual(input: 'value')
     expect(typeof model._base).toEqual('function')
@@ -27,7 +27,7 @@ describe "Industry Collection: ", ->
     expect(model._klass).toEqual(false)
     expect(Object.keys(model.traits).length).toEqual(0)
 
-    collection = industry.CollectionFactory.define(klass: test.MyCollection, model: model)
+    collection = industry.collection.define(klass: test.MyCollection, model: model)
 
     expect(collection._data).toEqual({})
     expect(typeof collection._base).toEqual('function')
@@ -46,7 +46,7 @@ describe "Industry Collection: ", ->
         other: 'one'
     }
 
-    model = industry.ModelFactory.define(data: {input: 'value'}, klass: test.MyClass, traits: traits)
+    model = industry.model.define(data: {input: 'value'}, klass: test.MyClass, traits: traits)
 
     expect(model._data).toEqual(input: 'value')
     expect(typeof model._base).toEqual('function')
@@ -54,7 +54,7 @@ describe "Industry Collection: ", ->
     expect(model._klass).toEqual(test.MyClass)
     expect(Object.keys(model._traits).length).toEqual(1)
 
-    collection = industry.CollectionFactory.define klass: test.MyCollection, (f) ->
+    collection = industry.collection.define klass: test.MyCollection, (f) ->
       f.trait 'pizza', ->
         pizza: 'pie'
 
