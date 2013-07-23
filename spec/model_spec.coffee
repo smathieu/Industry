@@ -67,38 +67,53 @@ describe "Industry Model: ", ->
     expect(result.time).toBeCloseTo(new Date().getTime(), 0)
 
 
-  it "Create model with traits (with sub options)", ->
-    model = industry.model.define (f) ->
-      f.data
-        input: 'value'
+  describe "Create model with traits, with sub options", ->
+    factory = null
 
-      f.trait 'currentTime', ->
-        time: new Date().getTime()
+    beforeEach ->
+      factory = industry.model.define (f) ->
+        f.data
+          input: 'value'
 
-      f.trait 'option', (options) ->
-        ret = {}
+        f.trait 'currentTime', ->
+          time: new Date().getTime()
 
-        if options.hasOption('apple')
-          ret['options_apple'] = true
-        if options.hasOption('pizza')
-          ret['options_pizza'] = true
-        if options.hasOption('orange')
-          ret['options_orange'] = true
+        f.trait 'option', (options) ->
+          ret = {}
 
-        ret
+          console.log(options._options)
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(2)
+          if options.hasOption('apple')
+            ret['options_apple'] = true
+          if options.hasOption('pizza')
+            ret['options_pizza'] = true
+          if options.hasOption('orange')
+            ret['options_orange'] = true
 
-    result = model.create(null, 'option:apple:pizza')
+          ret
 
-    expect(result.options_apple).toBeTruthy()
-    expect(result.options_pizza).toBeTruthy()
-    expect(result.options_organge).toEqual(undefined)
+      expect(factory._data).toEqual(input: 'value')
+      expect(typeof factory._base).toEqual('function')
+      expect(factory._base()).toEqual({})
+      expect(factory._klass).toEqual(false)
+      expect(Object.keys(factory._traits).length).toEqual(2)
 
+    afterEach ->
+      factory = null
+
+    it "and specific options", ->
+      result = factory.create(null, 'option:apple:pizza')
+
+      expect(result.options_apple).toBeTruthy()
+      expect(result.options_pizza).toBeTruthy()
+      expect(result.options_orange).toEqual(undefined)
+
+    it "and all options", ->
+      result = factory.create(null, 'option:all!')
+
+      expect(result.options_apple).toBeTruthy()
+      expect(result.options_pizza).toBeTruthy()
+      expect(result.options_orange).toBeTruthy()
 
   it "Create model from a parent", ->
     parent = industry.model.define (f) ->

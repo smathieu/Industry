@@ -17,7 +17,10 @@ class IndustryModel
     @_traits[name] = afunc
 
   traits: (traits) ->
-    @_traits = $.extend(@_traits, traits)
+    @_traits = $.extend({}, @_traits, traits)
+
+  getTrait: (name) ->
+    @_traits[name]
 
   data: (options) ->
     if typeof options is 'function'
@@ -31,15 +34,17 @@ class IndustryModel
   create: (data, traits...) ->
 
     if data == null
-      data = {}
+      ndata = {}
 
     data = $.extend({}, @_data, @_base(), data)
 
     for trait in traits
       trait = new TraitSelection(trait)
 
-      if @_traits[trait.name]
-        data = $.extend({}, data, @_traits[trait.name].call(@, trait))
+      if @getTrait(trait.name)
+        data = $.extend({}, data, @getTrait(trait.name).call(@, trait))
+
+      trait = null
 
     for key, val of data
       if typeof val is 'function'
@@ -141,6 +146,9 @@ class TraitSelection
   _options: {}
 
   constructor: (options) ->
+    @_options = {}
+    @name = false
+
     options = options.split(':')
     @name = options.shift()
 
@@ -150,6 +158,9 @@ class TraitSelection
   hasOption: (options...) ->
     if options.length < 1
       return false
+
+    if @_options['all!'] != 'undefined'
+      return true
 
     result = true
     for option in options
