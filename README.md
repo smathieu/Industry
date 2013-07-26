@@ -210,6 +210,41 @@ collection[1].id
 # => 'step_2'
 ```
 
+Using a Backbone.js model
+
+```coffeescript
+modelFactory = industry.defineModel klass: MyBackBoneModel, (f) ->
+
+  f.data ->
+    id: -> "step_#{f.sequence('id')}"
+    created_at: -> new Date().toString()
+
+  f.trait 'passed' , ->
+    result: 'passed'
+
+  f.trait 'failed' , ->
+    result: 'failed'
+
+
+model = modelFactory.create('passed')
+
+
+model
+=> Instance of MyBackboneModel
+```
+
+Using a Backbone.js collection
+
+```coffeescript
+modelFactory = industry.defineModel(klass: MyBackBoneCollection)
+
+
+model
+=> Instance of MyBackboneModel
+```
+
+_Note: the above example would throw an exception because there is no model being passed in!_
+
 # Running Tests
 
 We use Node, NPM and Jasmine to test Industry.

@@ -31,23 +31,12 @@ class IndustryModel
   klass: (obj) ->
     @_klass = obj
 
-  create: ->
+  create: (traits...) ->
 
-    data   = {}
-    traits = []
-
-    for argument in arguments
-      if typeof argument is 'string'
-        traits.push(argument)
-      if typeof argument is 'object'
-        data = argument
-
-    if data == null then data = {}
-
-    data = $.extend({}, @_data, @_base(), data)
+    data = $.extend({}, @_data, @_base())
 
     new TraitSelection(@).each traits, (trait, d) =>
-      data = $.extend({}, data, trait.call(@, d))
+      data = $.extend({}, data, trait.apply(@, d))
 
     for key, val of data
       if typeof val is 'function'
@@ -71,26 +60,23 @@ class IndustryCollection extends IndustryModel
   create: ->
 
     count  = 5
-    data   = {}
     traits = []
-    cache  = false
 
-    for argument, i in arguments
-      if typeof argument is 'number'
+    # Not parsing json data here
+    # The hassle is tooo much!
+    # Suggestions welcome
+    for argument in arguments
+      if typeof argument.constructor != 'undefined' and argument.constructor.name == 'IndustryModel'
+        model = argument
+      else if typeof argument is 'number'
         count = argument
-      if typeof argument is 'string'
+      else
         traits.push(argument)
-      if typeof argument is 'object'
-        if ! cache
-          model = argument
-          cache = true
-        else
-          data = argument
 
     _klass = @_klass
     @_klass = false
 
-    data = super(data)
+    data = super()
 
     @_klass = _klass
 
@@ -98,13 +84,16 @@ class IndustryCollection extends IndustryModel
 
     if ! model and @_model then model = @_model
 
-    if typeof model != 'undefined' and model != null
+    if typeof model is 'undefined' or model is null
+      throw "No model for collection"
+    else
       if count > 0
         for i in [1..count]
+          # Set the data and traits on the model
           model.traits(@_traits)
-          collection.push(model.create(traits..., data))
-    else
-      throw "No model for collection"
+          model.data(data)
+
+          collection.push(model.create(traits...))
 
     if @_klass then collection = new @_klass(collection)
 
@@ -171,13 +160,25 @@ class TraitSelection
 
   each: (traits, callback) ->
 
+    newtraits = {}
     for trait in traits
+      # Make sure traits are in hash form (even if passed as a array)
+      if typeof trait is 'string'
+        newtraits[trait] = []
+      if typeof trait is 'object'
+        newtraits = $.extend({}, newtraits, trait)
+
+    traits = newtraits
+
+    # Start parsing the traits
+    for trait, arguments of traits
       options = trait.split(':')
       name = options.shift()
       trait = @obj._traits[name]
 
       if typeof trait != 'undefined'
-        callback trait,
+        # The first argument will be the options
+        option_tool =
           hasOption: -> @hasOptions(arguments...)
           hasOptions: (input...) ->
             if options.length < 1 then return false
@@ -188,6 +189,8 @@ class TraitSelection
               result = (result && options.indexOf(option) != -1)
 
             return result
+
+        callback trait, [option_tool].concat(arguments)
 
 
 if typeof window != 'undefined'

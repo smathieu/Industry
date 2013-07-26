@@ -63,7 +63,7 @@ describe "Industry Model: ", ->
     expect(model._klass).toEqual(false)
     expect(Object.keys(model._traits).length).toEqual(1)
 
-    result = model.create(null, 'currentTime')
+    result = model.create('currentTime')
     expect(result.time).toBeCloseTo(new Date().getTime(), 0)
 
 
@@ -90,28 +90,47 @@ describe "Industry Model: ", ->
 
           ret
 
+        f.trait 'option_one', (options, passed_arg, other_arg) ->
+          ret = {}
+
+          if options.hasOption('pistachio')
+            ret['pistachio_options'] = true
+          if passed_arg['variable'] is 'value'
+            ret['hash_value'] = true
+          if other_arg == 'hai'
+            ret['string_value'] = true
+
+          ret
+
       expect(factory._data).toEqual(input: 'value')
       expect(typeof factory._base).toEqual('function')
       expect(factory._base()).toEqual({})
       expect(factory._klass).toEqual(false)
-      expect(Object.keys(factory._traits).length).toEqual(2)
+      expect(Object.keys(factory._traits).length).toEqual(3)
 
     afterEach ->
       factory = null
 
     it "and specific options", ->
-      result = factory.create(null, 'option:apple:pizza')
+      result = factory.create('option:apple:pizza')
 
       expect(result.options_apple).toBeTruthy()
       expect(result.options_pizza).toBeTruthy()
       expect(result.options_orange).toEqual(undefined)
 
     it "and all options", ->
-      result = factory.create(null, 'option:all!')
+      result = factory.create('option:all!')
 
       expect(result.options_apple).toBeTruthy()
       expect(result.options_pizza).toBeTruthy()
       expect(result.options_orange).toBeTruthy()
+
+    it "using hash options", ->
+      result = factory.create('option_one:pistachio': [{variable: 'value'}, 'hai'])
+
+      expect(result.pistachio_options).toBeTruthy()
+      expect(result.hash_value).toBeTruthy()
+      expect(result.string_value).toBeTruthy()
 
   it "Create model from a parent", ->
     parent = industry.defineModel (f) ->
@@ -131,7 +150,7 @@ describe "Industry Model: ", ->
     expect(model._klass).toEqual(false)
     expect(Object.keys(model._traits).length).toEqual(1)
 
-    result = model.create(null, 'currentTime')
+    result = model.create('currentTime')
     expect(Object.keys(result)).toEqual(['input', 'new_input', 'time'])
     expect(result.time).toBeCloseTo(new Date().getTime(), 0)
 
@@ -156,5 +175,7 @@ describe "Industry Model: ", ->
     expect(model._klass).toEqual(test.MyClass)
     expect(Object.keys(model._traits).length).toEqual(1)
 
-    result = model.create(fruit: 'orange', 'currentTime')
-    expect(Object.keys(result.data)).toEqual(['input', 'new_input', 'fruit', 'time'])
+    model.data(fruit: 'orange')
+
+    result = model.create('currentTime')
+    expect(Object.keys(result.data)).toEqual(['input', 'fruit', 'new_input', 'time'])
