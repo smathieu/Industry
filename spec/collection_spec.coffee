@@ -5,45 +5,45 @@ describe "Industry Collection: ", ->
 
   it "Create new empty collection", ->
 
-    model = industry.defineModel(data: {input: 'value'})
+    modelFactory = industry.defineModel(data: {input: 'value'})
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model.traits()).length).toEqual(0)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory.traits()).length).toEqual(0)
 
-    collection = industry.defineCollection()
+    collectionFactory = industry.defineCollection()
 
-    expect(collection._data).toEqual({})
-    expect(typeof collection._base).toEqual('function')
-    expect(collection._base()).toEqual({})
-    expect(collection._klass).toEqual(false)
-    expect(Object.keys(collection.traits).length).toEqual(0)
+    expect(collectionFactory._data).toEqual({})
+    expect(typeof collectionFactory._base).toEqual('function')
+    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._klass).toEqual(false)
+    expect(Object.keys(collectionFactory.traits).length).toEqual(0)
 
-    result = collection.create(0, model)
+    result = collectionFactory.create(0, modelFactory)
     expect(result).toEqual([])
 
 
   it "Create collection with 1 model", ->
 
-    model = industry.defineModel(data: {input: 'value'})
+    modelFactory = industry.defineModel(data: {input: 'value'})
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model.traits()).length).toEqual(0)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory.traits()).length).toEqual(0)
 
-    collection = industry.defineCollection(klass: test.MyCollection, model: model)
+    collectionFactory = industry.defineCollection(klass: test.MyCollection, model: modelFactory)
 
-    expect(collection._data).toEqual({})
-    expect(typeof collection._base).toEqual('function')
-    expect(collection._base()).toEqual({})
-    expect(collection._klass).toEqual(test.MyCollection)
-    expect(Object.keys(collection.traits()).length).toEqual(0)
+    expect(collectionFactory._data).toEqual({})
+    expect(typeof collectionFactory._base).toEqual('function')
+    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._klass).toEqual(test.MyCollection)
+    expect(Object.keys(collectionFactory.traits()).length).toEqual(0)
 
-    result = collection.create(1)
+    result = collectionFactory.create(1)
     expect(result.data.length).toEqual(1)
 
 
@@ -54,25 +54,25 @@ describe "Industry Collection: ", ->
         other: 'one'
     }
 
-    model = industry.defineModel(data: {input: 'value'}, klass: test.MyClass, traits: traits)
+    modelFactory = industry.defineModel(data: {input: 'value'}, klass: test.MyClass, traits: traits)
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(test.MyClass)
-    expect(Object.keys(model._traits).length).toEqual(1)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(test.MyClass)
+    expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
-    collection = industry.defineCollection klass: test.MyCollection, (f) ->
+    collectionFactory = industry.defineCollection klass: test.MyCollection, (f) ->
       f.trait 'pizza', ->
         pizza: 'pie'
 
-    expect(collection._data).toEqual({})
-    expect(typeof collection._base).toEqual('function')
-    expect(collection._base()).toEqual({})
-    expect(collection._klass).toEqual(test.MyCollection)
-    expect(Object.keys(collection._traits).length).toEqual(1)
+    expect(collectionFactory._data).toEqual({})
+    expect(typeof collectionFactory._base).toEqual('function')
+    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._klass).toEqual(test.MyCollection)
+    expect(Object.keys(collectionFactory._traits).length).toEqual(1)
 
-    result = collection.create(5, model, 'pizza', 'new').getResults()
+    result = collectionFactory.create(5, modelFactory, 'pizza', 'new').getResults()
 
     expect(result.length).toEqual(5)
     expect(Object.keys(result[0].data)).toEqual(['input', 'pizza', 'other'])
