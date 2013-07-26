@@ -111,25 +111,82 @@ modelFactory = industry.defineModel (f) ->
     return return_value
 
 
-model = modelFactory.create('passed', 'set_active', 'permissions')
+model = modelFactory.create('permissions')
 
 model.permissions
 # => {}
 
 
-model = modelFactory.create('passed', 'set_active', 'permissions:member')
+model = modelFactory.create('permissions:member')
 
 model.permissions
 # => {member: true}
 
 
-model = modelFactory.create('passed', 'set_active', 'permissions:member:moderator')
+model = modelFactory.create('permissions:member:moderator')
 
 model.permissions
 # => {member: true, moderator: true}
 
 
-model = modelFactory.create('passed', 'set_active', 'permissions:all!')
+model = modelFactory.create('permissions:all!')
+
+model.permissions
+# => {member: true, moderator: true, admin: true}
+```
+
+**Using traits with arguments:** Using arguments in your traits is no different from using then with options the biggest difference is you need to pass a hash with the trait name (optionally with colon seperated options as described above). Don't worry about getting it all in the first argument in the `.create()` method. All the arguments in `.create()` will be converted to traits regardless if they are strings or hashes.
+
+
+```coffeescript
+modelFactory = industry.defineModel (f) ->
+
+  f.data ->
+    id: -> "step_#{f.sequence('id')}"
+    created_at: -> new Date().toString()
+
+  f.trait 'permissions', (options, admin_override, extras), ->
+    return_value = {}
+
+    if options.hasOption('admin')
+      return_value['admin'] = true
+    if options.hasOption('moderator')
+      return_value['moderator'] = true
+    if options.hasOption('member')
+      return_value['member'] = true
+
+    if admin_override
+      return_value['admin'] = true
+
+    if extras['super_moderator']
+      return_value['super_moderator'] = true
+
+    if extras['nowrite']
+      return_value['nowrite'] = true
+
+    return return_value
+
+
+model = modelFactory.create('permissions')
+
+model.permissions
+# => {}
+
+
+model = modelFactory.create({'permissions:member': [true]})
+
+model.permissions
+# => {member: true, admin: true}
+
+
+model = modelFactory.create({'permissions:member:moderator': [false, {super_moderator: true}]})
+
+model.permissions
+# => {member: true, moderator: true, super_moderator: true}
+
+
+# The all! option only affect options and will ignore arguments
+model = modelFactory.create('permissions:all!')
 
 model.permissions
 # => {member: true, moderator: true, admin: true}
