@@ -89,7 +89,6 @@ class IndustryCollection extends IndustryModel
     else
       if count > 0
         for i in [1..count]
-          # Set the data and traits on the model
           model.traits(@_traits)
           model.data(data)
 

@@ -4,71 +4,79 @@ industry = require('../lib/industry.coffee').industry
 describe "Industry Model: ", ->
 
   it "Create new empty model", ->
-    model = industry.defineModel()
+    modelFactory = industry.defineModel()
 
-    expect(model._data).toEqual({})
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(0)
+    expect(modelFactory._data).toEqual({})
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory._traits).length).toEqual(0)
 
-    result = model.create()
+    result = modelFactory.create()
     expect(result).toEqual({})
 
 
   it "Create model with object for default", ->
-    model = industry.defineModel (f) ->
+    modelFactory = industry.defineModel (f) ->
       f.data
         input: 'value'
         input1: 'value1'
 
-    expect(model._data).toEqual(input: 'value', input1: 'value1')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(0)
+    expect(modelFactory._data).toEqual(input: 'value', input1: 'value1')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory._traits).length).toEqual(0)
 
-    result = model.create()
+    result = modelFactory.create()
     expect(result).toEqual(input: 'value', input1: 'value1')
 
 
   it "Create model with anonymous function for default", ->
-    model = industry.defineModel (f) ->
+    time = null
+
+    modelFactory = industry.defineModel (f) ->
       f.data ->
         time = new Date().getTime()
-        {time: time}
 
-    expect(model._data).toEqual({})
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).not.toEqual({})
-    expect(model._base().time).toBeCloseTo(new Date().getTime(), 0)
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(0)
+        time: time
 
-    result = model.create()
-    expect(result.time).toBeCloseTo(new Date().getTime(), 0)
+    expect(modelFactory._data).toEqual({})
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).not.toEqual({})
+    expect(modelFactory._base().time).toEqual(time)
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory._traits).length).toEqual(0)
+
+    result = modelFactory.create()
+    expect(result.time).toEqual(time)
 
 
   it "Create model with traits", ->
-    model = industry.defineModel (f) ->
+    time = null
+
+    modelFactory = industry.defineModel (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
-        time: new Date().getTime()
+        time = new Date().getTime()
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual({})
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(1)
+        time: time
 
-    result = model.create('currentTime')
-    expect(result.time).toBeCloseTo(new Date().getTime(), 0)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory._traits).length).toEqual(1)
+
+    result = modelFactory.create('currentTime')
+    expect(result.time).toEqual(time)
 
 
   describe "Create model with traits, with sub options", ->
     factory = null
+    time = null
 
     beforeEach ->
       factory = industry.defineModel (f) ->
@@ -76,7 +84,9 @@ describe "Industry Model: ", ->
           input: 'value'
 
         f.trait 'currentTime', ->
-          time: new Date().getTime()
+          time = new Date().getTime()
+
+          time: time
 
         f.trait 'option', (options) ->
           ret = {}
@@ -110,6 +120,7 @@ describe "Industry Model: ", ->
 
     afterEach ->
       factory = null
+      time = null
 
     it "and specific options", ->
       result = factory.create('option:apple:pizza')
@@ -133,49 +144,57 @@ describe "Industry Model: ", ->
       expect(result.string_value).toBeTruthy()
 
   it "Create model from a parent", ->
+    time = null
+
     parent = industry.defineModel (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
-        time: new Date().getTime()
+        time = new Date().getTime()
 
-    model = industry.defineModel parent: parent, (f) ->
+        time: time
+
+    modelFactory = industry.defineModel parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual(new_input: 'child')
-    expect(model._klass).toEqual(false)
-    expect(Object.keys(model._traits).length).toEqual(1)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual(new_input: 'child')
+    expect(modelFactory._klass).toEqual(false)
+    expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
-    result = model.create('currentTime')
+    result = modelFactory.create('currentTime')
     expect(Object.keys(result)).toEqual(['input', 'new_input', 'time'])
-    expect(result.time).toBeCloseTo(new Date().getTime(), 0)
+    expect(result.time).toEqual(time)
 
 
   it "Create model with a class", ->
+    time = null
+
     parent = industry.defineModel (f) ->
       f.data
         input: 'value'
 
       f.trait 'currentTime', ->
-        time: new Date().getTime()
+        time = new Date().getTime()
 
-    model = industry.defineModel parent: parent, (f) ->
+        time: time
+
+    modelFactory = industry.defineModel parent: parent, (f) ->
       f.data ->
         new_input: 'child'
 
       f.klass test.MyClass
 
-    expect(model._data).toEqual(input: 'value')
-    expect(typeof model._base).toEqual('function')
-    expect(model._base()).toEqual(new_input: 'child')
-    expect(model._klass).toEqual(test.MyClass)
-    expect(Object.keys(model._traits).length).toEqual(1)
+    expect(modelFactory._data).toEqual(input: 'value')
+    expect(typeof modelFactory._base).toEqual('function')
+    expect(modelFactory._base()).toEqual(new_input: 'child')
+    expect(modelFactory._klass).toEqual(test.MyClass)
+    expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
-    model.data(fruit: 'orange')
+    modelFactory.data(fruit: 'orange')
 
-    result = model.create('currentTime')
+    result = modelFactory.create('currentTime')
     expect(Object.keys(result.data)).toEqual(['input', 'fruit', 'new_input', 'time'])
