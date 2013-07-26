@@ -19,7 +19,38 @@ Production Dependencies
 
 # Usage
 
-Basic Model usage with traits.
+Basic Model usage.
+
+```coffeescript
+modelFactory = industry.defineModel (f) ->
+
+  f.data ->
+    id: -> "step_#{f.sequence('id')}"
+    email: "example@example.com"
+
+  f.trait 'passed' , ->
+    result: 'passed'
+
+  f.trait 'failed' , ->
+    result: 'failed'
+
+
+model = modelFactory.data(created_at: new Date().toString()).create('passed')
+
+
+model.id
+# => 'step_1'
+
+
+model.created_at
+# => DateStamp
+
+
+model.result
+# => 'passed'
+```
+
+Using traits.
 
 ```coffeescript
 modelFactory = industry.defineModel (f) ->
@@ -135,7 +166,7 @@ model.permissions
 # => {member: true, moderator: true, admin: true}
 ```
 
-**Using traits with arguments:** Using arguments in your traits is no different from using then with options the biggest difference is you need to pass a hash with the trait name (optionally with colon seperated options as described above). Don't worry about getting it all in the first argument in the `.create()` method. All the arguments in `.create()` will be converted to traits regardless if they are strings or hashes.
+Using traits with arguments
 
 
 ```coffeescript
@@ -173,13 +204,13 @@ model.permissions
 # => {}
 
 
-model = modelFactory.create({'permissions:member': [true]})
+model = modelFactory.permissions(true).create('permissions:member')
 
 model.permissions
 # => {member: true, admin: true}
 
 
-model = modelFactory.create({'permissions:member:moderator': [false, {super_moderator: true}]})
+model = modelFactory.permissions(false, {super_moderator: true}).create('permissions:member:moderator')
 
 model.permissions
 # => {member: true, moderator: true, super_moderator: true}

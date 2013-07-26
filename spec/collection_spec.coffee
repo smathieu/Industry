@@ -11,9 +11,9 @@ describe "Industry Collection: ", ->
     expect(typeof modelFactory._base).toEqual('function')
     expect(modelFactory._base()).toEqual({})
     expect(modelFactory._klass).toEqual(false)
-    expect(Object.keys(modelFactory.traits()).length).toEqual(0)
+    expect(Object.keys(modelFactory.traits).length).toEqual(0)
 
-    collectionFactory = industry.defineCollection()
+    collectionFactory = industry.defineCollection(model: modelFactory)
 
     expect(collectionFactory._data).toEqual({})
     expect(typeof collectionFactory._base).toEqual('function')
@@ -72,7 +72,7 @@ describe "Industry Collection: ", ->
     expect(collectionFactory._klass).toEqual(test.MyCollection)
     expect(Object.keys(collectionFactory._traits).length).toEqual(1)
 
-    result = collectionFactory.create(5, modelFactory, 'pizza', 'new').getResults()
+    result = collectionFactory.model(modelFactory).create(5, 'pizza', 'new').getResults()
 
     expect(result.length).toEqual(5)
     expect(Object.keys(result[0].data)).toEqual(['input', 'pizza', 'other'])

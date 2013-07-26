@@ -1,5 +1,6 @@
 class IndustryModel
   _traits: {}
+  _traits_args: {}
   _data: {}
   _base: -> {}
   _klass: false
@@ -16,20 +17,37 @@ class IndustryModel
   trait: (name, afunc) ->
     @_traits[name] = afunc
 
-  traits: (traits) ->
+    if typeof @[name] is 'undefined'
+      @[name] = (args...) =>
+        @_traits_args[name] = args
+        @
+    else
+      throw "#{name} is a reserved name."
+    @
+
+  traits: (traits, args) ->
     if arguments.length < 1
       return @_traits
+    else if traits == true
+      return [@_traits, @_traits_args]
 
     @_traits = $.extend({}, @_traits, traits)
+
+    if typeof args != 'undefined'
+      @_traits_args = $.extend({}, @_traits_args, args)
+
+    @
 
   data: (options) ->
     if typeof options is 'function'
       @_base = options
     else
       @_data = $.extend({}, @_data, options)
+    @
 
   klass: (obj) ->
     @_klass = obj
+    @
 
   create: (traits...) ->
 
@@ -56,19 +74,15 @@ class IndustryCollection extends IndustryModel
 
   model: (m) ->
     @_model = m
+    @
 
   create: ->
 
     count  = 5
     traits = []
 
-    # Not parsing json data here
-    # The hassle is tooo much!
-    # Suggestions welcome
     for argument in arguments
-      if typeof argument.constructor != 'undefined' and argument.constructor.name == 'IndustryModel'
-        model = argument
-      else if typeof argument is 'number'
+      if typeof argument is 'number'
         count = argument
       else
         traits.push(argument)
@@ -89,7 +103,7 @@ class IndustryCollection extends IndustryModel
     else
       if count > 0
         for i in [1..count]
-          model.traits(@_traits)
+          model.traits(@_traits, @_traits_args)
           model.data(data)
 
           collection.push(model.create(traits...))
@@ -159,23 +173,16 @@ class TraitSelection
 
   each: (traits, callback) ->
 
-    newtraits = {}
-    for trait in traits
-      # Make sure traits are in hash form (even if passed as a array)
-      if typeof trait is 'string'
-        newtraits[trait] = []
-      if typeof trait is 'object'
-        newtraits = $.extend({}, newtraits, trait)
-
-    traits = newtraits
     trait_names = []
 
     # Start parsing the traits
-    for trait, arguments of traits
+    for trait in traits
       options = trait.split(':')
       name = options.shift()
       trait_names.push(name)
+
       trait = @obj._traits[name]
+      args  = @obj._traits_args[name]
 
       if typeof trait != 'undefined'
         # The first argument will be the options
@@ -192,7 +199,7 @@ class TraitSelection
 
             return result
 
-        callback trait, [option_tool].concat(arguments)
+        callback trait, [option_tool].concat(args)
 
 
 if typeof window != 'undefined'

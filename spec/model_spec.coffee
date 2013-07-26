@@ -137,7 +137,7 @@ describe "Industry Model: ", ->
       expect(result.options_orange).toBeTruthy()
 
     it "using hash options", ->
-      result = factory.create('option_one:pistachio': [{variable: 'value'}, 'hai'])
+      result = factory.option_one({variable: 'value'}, 'hai').create('option_one:pistachio')
 
       expect(result.pistachio_options).toBeTruthy()
       expect(result.hash_value).toBeTruthy()
