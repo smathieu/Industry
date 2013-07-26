@@ -168,16 +168,19 @@ class TraitSelection
         newtraits = $.extend({}, newtraits, trait)
 
     traits = newtraits
+    trait_names = []
 
     # Start parsing the traits
     for trait, arguments of traits
       options = trait.split(':')
       name = options.shift()
+      trait_names.push(name)
       trait = @obj._traits[name]
 
       if typeof trait != 'undefined'
         # The first argument will be the options
         option_tool =
+          hasTrait: (name) -> trait_names.indexOf(name) != -1
           hasOption: -> @hasOptions(arguments...)
           hasOptions: (input...) ->
             if options.length < 1 then return false
