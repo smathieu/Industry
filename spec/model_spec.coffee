@@ -3,13 +3,13 @@ industry = require('../lib/industry.coffee').industry
 
 describe "Industry Model: ", ->
 
+
   it "Create new empty model", ->
     modelFactory = industry.defineModel()
 
-    expect(modelFactory._data).toEqual({})
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data).toEqual([])
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(0)
 
     result = modelFactory.create()
@@ -22,10 +22,9 @@ describe "Industry Model: ", ->
         input: 'value'
         input1: 'value1'
 
-    expect(modelFactory._data).toEqual(input: 'value', input1: 'value1')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data[0]).toEqual(input: 'value', input1: 'value1')
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(0)
 
     result = modelFactory.create()
@@ -41,11 +40,10 @@ describe "Industry Model: ", ->
 
         time: time
 
-    expect(modelFactory._data).toEqual({})
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).not.toEqual({})
-    expect(modelFactory._base().time).toEqual(time)
+    expect(typeof modelFactory._data[0]).toEqual('function')
+    expect(modelFactory._data[0].call(modelFactory).time).toEqual(time)
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(0)
 
     result = modelFactory.create()
@@ -64,10 +62,9 @@ describe "Industry Model: ", ->
 
         time: time
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data[0]).toEqual(input: 'value')
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
     result = modelFactory.create('currentTime')
@@ -77,6 +74,7 @@ describe "Industry Model: ", ->
   describe "Create model with traits, with sub options", ->
     factory = null
     time = null
+
 
     beforeEach ->
       factory = industry.defineModel (f) ->
@@ -112,15 +110,16 @@ describe "Industry Model: ", ->
 
           ret
 
-      expect(factory._data).toEqual(input: 'value')
-      expect(typeof factory._base).toEqual('function')
-      expect(factory._base()).toEqual({})
+      expect(factory._data[0]).toEqual(input: 'value')
       expect(factory._klass).toEqual(false)
+      expect(factory._klass_callback).toEqual([])
       expect(Object.keys(factory._traits).length).toEqual(3)
+
 
     afterEach ->
       factory = null
       time = null
+
 
     it "and specific options", ->
       result = factory.create('option:apple:pizza')
@@ -129,6 +128,7 @@ describe "Industry Model: ", ->
       expect(result.options_pizza).toBeTruthy()
       expect(result.options_orange).toEqual(undefined)
 
+
     it "and all options", ->
       result = factory.create('option:all!')
 
@@ -136,12 +136,14 @@ describe "Industry Model: ", ->
       expect(result.options_pizza).toBeTruthy()
       expect(result.options_orange).toBeTruthy()
 
+
     it "using hash options", ->
       result = factory.option_one({variable: 'value'}, 'hai').create('option_one:pistachio')
 
       expect(result.pistachio_options).toBeTruthy()
       expect(result.hash_value).toBeTruthy()
       expect(result.string_value).toBeTruthy()
+
 
   it "Create model from a parent", ->
     time = null
@@ -156,13 +158,13 @@ describe "Industry Model: ", ->
         time: time
 
     modelFactory = industry.defineModel parent: parent, (f) ->
-      f.data ->
+      f.data
         new_input: 'child'
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual(new_input: 'child')
+    expect(modelFactory._data[0]).toEqual(input: 'value')
+    expect(modelFactory._data[1]).toEqual(new_input: 'child')
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
     result = modelFactory.create('currentTime')
@@ -188,13 +190,12 @@ describe "Industry Model: ", ->
 
       f.klass test.MyClass
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual(new_input: 'child')
+    expect(modelFactory._data[0]).toEqual(input: 'value')
+    expect(modelFactory._data[1].call(modelFactory)).toEqual(new_input: 'child')
     expect(modelFactory._klass).toEqual(test.MyClass)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
-    modelFactory.data(fruit: 'orange')
+    result = modelFactory.data(fruit: 'orange').create('currentTime')
 
-    result = modelFactory.create('currentTime')
-    expect(Object.keys(result.data)).toEqual(['input', 'fruit', 'new_input', 'time'])
+    expect(Object.keys(result.data)).toEqual(['input', 'new_input', 'fruit', 'time'])

@@ -1,24 +1,27 @@
 test     = require('../lib/test.coffee')
 industry = require('../lib/industry.coffee').industry
 
+
 describe "Industry Collection: ", ->
+
 
   it "Create new empty collection", ->
 
     modelFactory = industry.defineModel(data: {input: 'value'})
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data[0]).toEqual(input: 'value')
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory.traits).length).toEqual(0)
 
     collectionFactory = industry.defineCollection(model: modelFactory)
 
-    expect(collectionFactory._data).toEqual({})
-    expect(typeof collectionFactory._base).toEqual('function')
-    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._data).toEqual([])
     expect(collectionFactory._klass).toEqual(false)
+    expect(collectionFactory._klass_callback).toEqual([])
+    expect(collectionFactory._model_callback).toEqual([])
+    expect(collectionFactory._model).toEqual(modelFactory)
+
     expect(Object.keys(collectionFactory.traits).length).toEqual(0)
 
     result = collectionFactory.create(0, modelFactory)
@@ -29,21 +32,23 @@ describe "Industry Collection: ", ->
 
     modelFactory = industry.defineModel(data: {input: 'value'})
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data[0]).toEqual(input: 'value')
     expect(modelFactory._klass).toEqual(false)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory.traits()).length).toEqual(0)
 
     collectionFactory = industry.defineCollection(klass: test.MyCollection, model: modelFactory)
 
-    expect(collectionFactory._data).toEqual({})
-    expect(typeof collectionFactory._base).toEqual('function')
-    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._data).toEqual([])
     expect(collectionFactory._klass).toEqual(test.MyCollection)
-    expect(Object.keys(collectionFactory.traits()).length).toEqual(0)
+    expect(collectionFactory._klass_callback).toEqual([])
+    expect(collectionFactory._model_callback).toEqual([])
+    expect(collectionFactory._model).toEqual(modelFactory)
 
     result = collectionFactory.create(1)
+
+    #console.log(result)
+
     expect(result.data.length).toEqual(1)
 
 
@@ -56,26 +61,26 @@ describe "Industry Collection: ", ->
 
     modelFactory = industry.defineModel(data: {input: 'value'}, klass: test.MyClass, traits: traits)
 
-    expect(modelFactory._data).toEqual(input: 'value')
-    expect(typeof modelFactory._base).toEqual('function')
-    expect(modelFactory._base()).toEqual({})
+    expect(modelFactory._data[0]).toEqual(input: 'value')
     expect(modelFactory._klass).toEqual(test.MyClass)
+    expect(modelFactory._klass_callback).toEqual([])
     expect(Object.keys(modelFactory._traits).length).toEqual(1)
 
     collectionFactory = industry.defineCollection klass: test.MyCollection, (f) ->
       f.trait 'pizza', ->
         pizza: 'pie'
 
-    expect(collectionFactory._data).toEqual({})
-    expect(typeof collectionFactory._base).toEqual('function')
-    expect(collectionFactory._base()).toEqual({})
+    expect(collectionFactory._data).toEqual([])
     expect(collectionFactory._klass).toEqual(test.MyCollection)
+    expect(collectionFactory._klass_callback).toEqual([])
+    expect(collectionFactory._model_callback).toEqual([])
     expect(Object.keys(collectionFactory._traits).length).toEqual(1)
 
     result = collectionFactory.model(modelFactory).create(5, 'pizza', 'new').getResults()
 
     expect(result.length).toEqual(5)
     expect(Object.keys(result[0].data)).toEqual(['input', 'pizza', 'other'])
+
 
   it "Create a collection with sequences", ->
 
@@ -84,7 +89,6 @@ describe "Industry Collection: ", ->
       f.data ->
         id: "test_#{f.sequence('id')}"
         name: "Milly"
-
 
     collectionFactory = industry.defineCollection model: modelFactory, (f) ->
 
