@@ -1,0 +1,20 @@
+{
+  "name"         : "industry",
+  "version"      : "0.0.1",
+  "author"       : "Kelly Becker <kbecker@kellybecker.me>",
+  "description"  : "A javascript factory",
+  "contributors" : [
+    {
+      "name"  : "Kelly Becker",
+      "email" : "kbecker@kellybecker.me"
+    }
+  ],
+  "scripts" : {
+    "test" : "jasmine-node --coffee ./spec"
+  },
+  "dependencies" : {
+    "jasmine-node"   :  "*",
+    "coffee-script"  :  "*",
+    "underscore"     :  "*"
+  }
+}
